@@ -3,7 +3,7 @@ import { isIP } from 'node:net'
 import { defineTool } from '@deepseek-ai/dsh-tools'
 
 export const name = 'dsh-browser-handoff'
-export const inject = ['tools', 'approval']
+export const inject = ['tools', 'userQuestions']
 
 const FETCH_LIMIT_BYTES = 1_500_000
 const FETCH_TIMEOUT_MS = 15_000
@@ -262,18 +262,42 @@ async function requestOpen(ctx, args, exec, toolName) {
   const reason = String(args.reason || '').trim()
   if (!reason) throw new Error('browser access requires a non-empty reason')
 
-  const outcome = await ctx.approval.request({
+  const allowLabel = '本次允许'
+  const denyLabel = '拒绝'
+  const questionId = 'browser-open-access'
+  const answer = await ctx.userQuestions.ask({
     agent: exec.agent,
-    toolName,
-    callId: exec.callId,
-    reason: 'Open ' + target.origin + ' in the DSH controlled Browser (' + intent + ', ' + mode + '): ' + reason,
     signal: exec.signal,
+    questions: [{
+      id: questionId,
+      header: '浏览器权限',
+      question: '允许 AI 打开 ' + target.origin + ' 吗？',
+      detail:
+        '目标：' + target.href + '\n'
+        + '用途：' + reason + '\n'
+        + '设备模式：' + mode + '\n'
+        + '交互意图：' + intent + '\n\n'
+        + '仅授权本次打开。密码、验证码和支付确认请只在网页中输入，不要发给 AI。',
+      options: [
+        { label: allowLabel, description: '仅允许这一次打开请求' },
+        { label: denyLabel, description: '不打开该网页' },
+      ],
+      intent: {
+        kind: 'approval',
+        approve: allowLabel,
+        reject: denyLabel,
+        subject: { name: target.origin },
+      },
+    }],
   })
 
-  if (outcome !== 'allowed-once') {
+  const selected = answer?.answers?.find(item => item?.id === questionId)?.selected
+  const allowed = Array.isArray(selected) && selected.includes(allowLabel)
+
+  if (!allowed) {
     return out({
       status: 'denied',
-      outcome,
+      outcome: 'user-question-rejected',
       action: 'open',
       url: target.href,
       origin: target.origin,
@@ -284,7 +308,7 @@ async function requestOpen(ctx, args, exec, toolName) {
 
   return out({
     status: 'approved',
-    outcome,
+    outcome: 'user-question-allowed-once',
     action: 'open',
     url: target.href,
     origin: target.origin,
