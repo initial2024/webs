@@ -1,5 +1,20 @@
 # dsh-browser-handoff
 
+## v0.3.0 — OAuth / system-browser handoff
+
+Embedded Android WebView sign-in is intentionally rejected by some identity providers, including Google in some flows. v0.3.0 does **not** try to bypass that policy by endlessly changing User-Agent strings.
+
+When the native `browser` tool reports `action: "external"`, this plugin now renders a user-clicked **用系统浏览器打开 / Open in system browser** button in the DSH conversation. The click runs inside DSH's main Web UI; on Android, the existing native `SystemWebHost` forwards that external `window.open` navigation to the user's system browser.
+
+Security and capability boundary:
+
+- passwords, OTPs, account selection and payment confirmation stay in the system browser;
+- no background launch is claimed before the user clicks;
+- system-browser cookies are **not** assumed to be shared with the AI Browser WebView;
+- a seamless return of login state requires the target site to provide an app callback/deep link or a future native target-scoped Browser Broker.
+
+The human-handoff card also offers the system-browser button when a URL is available.
+
 DSH 内置 **AI 浏览器 / 人工接管桥**。
 
 ## v0.2.1
