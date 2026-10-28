@@ -27,6 +27,9 @@ window.__ModuleLoader__.load({
         forward: '前进',
         reload: '刷新',
         external: '外部打开',
+        systemExternal: '用系统浏览器打开',
+        oauthBlocked: '该登录页拒绝嵌入式 WebView，请改用系统浏览器人工登录。',
+        cookieSeparate: '系统浏览器与 AI Browser 默认不共享 Cookie；完成登录后只有站点支持回调/深链时才能自动返回登录态。',
         modeAuto: '自动',
         modeDesktop: '电脑版',
         modeIphone: 'iPhone',
@@ -61,6 +64,9 @@ window.__ModuleLoader__.load({
         forward: 'Forward',
         reload: 'Reload',
         external: 'Open externally',
+        systemExternal: 'Open in system browser',
+        oauthBlocked: 'This sign-in page rejects embedded WebView. Continue manually in the system browser.',
+        cookieSeparate: 'System-browser cookies are separate from AI Browser WebView cookies unless the site provides a callback/deep link.',
         modeAuto: 'Auto',
         modeDesktop: 'Desktop',
         modeIphone: 'iPhone',
@@ -273,7 +279,32 @@ window.__ModuleLoader__.load({
             reason ? h('div', { style: s.meta }, t('reason') + ': ' + reason) : null,
             h('div', { style: s.actions },
               h('button', { type: 'button', style: s.button, onClick: () => openBrowser(url, mode) }, t('takeover')),
+              url ? h('button', { type: 'button', style: s.button, onClick: () => window.open(url, '_blank', 'noopener,noreferrer') }, t('systemExternal')) : null,
             ),
+            h('div', { style: s.meta }, t('secret')),
+          );
+        }
+
+        function ExternalNativeBrowserRow(props) {
+          const args = argsOf(props.phase, props.block);
+          if (String(args.action || '') !== 'external') return null;
+          const url = normalizeUrl(args.url);
+          if (!url) return null;
+          const openSystem = () => {
+            try {
+              window.open(url, '_blank', 'noopener,noreferrer');
+            } catch (error) {
+              console.warn('[dsh-browser-handoff] system-browser handoff failed', error);
+            }
+          };
+          return h('section', { style: s.card, 'data-browser-handoff-external': true },
+            h('div', { style: s.title }, t('human')),
+            h('div', { style: s.warning }, t('oauthBlocked')),
+            h('div', { style: s.meta }, url),
+            h('div', { style: s.actions },
+              h('button', { type: 'button', style: s.button, onClick: openSystem }, t('systemExternal')),
+            ),
+            h('div', { style: s.meta }, t('cookieSeparate')),
             h('div', { style: s.meta }, t('secret')),
           );
         }
@@ -524,6 +555,15 @@ window.__ModuleLoader__.load({
         });
 
         ctx.slots.inject('tool.call.toolview', function* () {
+          // Native Android browser action:"external" is a prepared handoff, not a
+          // background launch. The user-clicked button below runs in DSH's main
+          // WebView, whose SystemWebHost forwards window.open to the Android
+          // system browser.
+          yield ctx.slots.register({
+            name: 'tool.call.toolview',
+            key: 'browser',
+            locale: NS,
+          }, ExternalNativeBrowserRow);
           for (const key of ['browser_open', 'browser_request_access']) {
             yield ctx.slots.register({
               name: 'tool.call.toolview',
