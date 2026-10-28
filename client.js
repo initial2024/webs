@@ -122,7 +122,9 @@ window.__ModuleLoader__.load({
       const candidate = /^[a-z][a-z0-9+.-]*:/i.test(value) ? value : 'https://' + value;
       try {
         const url = new URL(candidate);
-        return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : '';
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') return '';
+        if (typeof window !== 'undefined' && window.location && url.origin === window.location.origin) return '';
+        return url.href;
       } catch {
         return '';
       }
@@ -468,7 +470,7 @@ window.__ModuleLoader__.load({
                       src: url,
                       title: t('title'),
                       referrerPolicy: 'no-referrer',
-                      sandbox: 'allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox',
+                      sandbox: 'allow-scripts allow-forms allow-same-origin allow-popups',
                       style: { width: '100%', height: '100%', border: 0, background: '#fff' },
                     }),
                   )
