@@ -258,7 +258,7 @@ async function fetchPublicPage(rawUrl, mode, outerSignal) {
 async function requestOpen(ctx, args, exec, toolName) {
   const target = targetOf(args.url)
   const mode = normalizeMode(args.mode)
-  const intent = args.intent === 'interactive' ? 'interactive' : 'read-only'
+  const intent = args.intent === 'interactive' || args.mode === 'interactive' ? 'interactive' : 'read-only'
   const reason = String(args.reason || '').trim()
   if (!reason) throw new Error('browser access requires a non-empty reason')
 
@@ -327,7 +327,7 @@ export function apply(ctx) {
     parameters: {
       url: { type: 'string', required: true },
       reason: { type: 'string', required: true },
-      mode: { type: 'string', enum: ['auto', 'desktop', 'iphone', 'ipad'] },
+      mode: { type: 'string', enum: ['auto', 'desktop', 'iphone', 'ipad', 'read-only', 'interactive'], description: 'Legacy read-only/interactive values remain accepted; new callers should use intent for that and mode for viewport.' },
       intent: { type: 'string', enum: ['read-only', 'interactive'] },
     },
     output: stringOutput,
