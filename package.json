@@ -1,7 +1,7 @@
 {
   "name": "dsh-browser-handoff",
-  "version": "0.2.1",
-  "description": "DSH controlled Browser with blocking user-question approval, viewport profiles, public-page AI reading, and human handoff.",
+  "version": "0.3.0",
+  "description": "DSH controlled Browser with safe embedded-WebView OAuth detection, user-clicked system-browser handoff, viewport profiles, public-page AI reading, and human takeover.",
   "type": "module",
   "private": true,
   "exports": {
