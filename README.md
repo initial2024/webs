@@ -2,7 +2,7 @@
 
 DSH 内置 **AI 浏览器 / 人工接管桥**。
 
-## v0.2.0
+## v0.2.1
 
 v0.2 不再把“AI 操作中”当成装饰状态：模型现在拥有真实、可验证的浏览器工具，并由工具结果驱动 DSH 里的受控浏览器页面。
 
@@ -112,3 +112,16 @@ Broker 必须保证：
 ## 安装
 
 Android DSH 某些环境无法执行 git，可直接安装 GitHub source tarball。更新旧版时建议先卸载旧插件，再安装当前固定提交版本，最后完全退出并重新启动 DSH。
+
+
+### v0.2.1 permission flow
+
+`browser_open` and the compatibility alias `browser_request_access` no longer depend on `ctx.approval`.
+They use the blocking `ctx.userQuestions.ask()` approval presentation instead.
+
+This matters on DSH sessions where native Approval prompts are disabled: those sessions used to auto-return
+`rejected` without showing any UI. The new flow shows a browser permission decision with
+“本次允许 / 拒绝”; the tool call stays pending until the user answers, and returns `approved` only after
+“本次允许”.
+
+The decision is one-shot. It does not grant access to passwords, OTP values, payment confirmation, or unrelated tabs.
