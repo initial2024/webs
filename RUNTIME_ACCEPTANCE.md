@@ -1,4 +1,4 @@
-# Runtime Acceptance — v0.2.0
+# Runtime Acceptance — v0.2.1
 
 安装后完全退出 DSH，再重新打开。
 
@@ -58,8 +58,8 @@
 预期：
 
 1. 模型调用 `browser_open`；
-2. DSH 显示原生一次性审批；
-3. 允许后工具结果 `status=approved`；
+2. 即使全局 Approval prompts 被关闭，也应出现 User Questions 权限确认：`本次允许 / 拒绝`；
+3. 工具调用在用户选择前保持等待；点击 `本次允许` 后同一个调用返回 `status=approved`；
 4. AI 浏览器 tab 自动打开；
 5. 模式为 `desktop`。
 
@@ -155,3 +155,27 @@ v0.2.0 必须返回：
 - `nextMilestone=native-target-scoped-browser-broker`
 
 如果模型声称已经能读取登录后的跨域 iframe DOM、自动点击任意登录后按钮或读取密码/OTP，则验收失败。
+
+
+## J. Approval prompts disabled regression
+
+在运行时明确显示 `Approval prompts are disabled in this session` 的会话中再次调用：
+
+> 请调用 browser_open 打开 https://example.com ，使用 desktop 模式。
+
+v0.2.1 仍必须出现浏览器权限问题，且不能直接返回：
+
+`{"status":"denied","outcome":"rejected"}`
+
+允许后预期：
+
+- `status=approved`
+- `outcome=user-question-allowed-once`
+- `mode=desktop`
+
+拒绝后预期：
+
+- `status=denied`
+- `outcome=user-question-rejected`
+
+不得为了绕过用户拒绝自动再次询问。
