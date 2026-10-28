@@ -1,0 +1,41 @@
+{
+  "name": "dsh-browser-handoff",
+  "version": "0.1.0",
+  "description": "DSH embedded Browser handoff with native approval, human takeover, and target-broker readiness.",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-sidebar-right",
+        "@deepseek-ai/dsh-client-ui-sidebar-browser",
+        "@deepseek-ai/dsh-client-ui-tool"
+      ]
+    }
+  },
+  "keywords": [
+    "dshapp-plugin",
+    "dsh",
+    "browser",
+    "handoff",
+    "human-in-the-loop"
+  ],
+  "license": "MIT"
+}
