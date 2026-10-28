@@ -1,7 +1,7 @@
 {
   "name": "dsh-browser-handoff",
-  "version": "0.1.0",
-  "description": "DSH embedded Browser handoff with native approval, human takeover, and target-broker readiness.",
+  "version": "0.2.0",
+  "description": "DSH controlled Browser with viewport profiles, public-page AI reading, native approval, and human handoff.",
   "type": "module",
   "private": true,
   "exports": {
