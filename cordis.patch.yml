@@ -1,0 +1,5 @@
+- id: ui-sidebar-browser
+  disabled: false
+- insert:
+    - id: dsh-browser-handoff
+      name: dsh-browser-handoff
